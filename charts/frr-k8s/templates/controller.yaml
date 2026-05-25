@@ -169,6 +169,11 @@ spec:
           securityContext:
             runAsUser: 100
             runAsGroup: 101
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
           command: ["/bin/sh", "-c", "cp -rLf /tmp/frr/* /etc/frr/"]
           volumeMounts:
             - name: frr-startup
@@ -178,6 +183,12 @@ spec:
         # Copies the reloader to the shared volume between the speaker and reloader.
         - name: cp-reloader
           image: {{ .Values.frrk8s.image.repository }}:{{ .Values.frrk8s.image.tag | default .Chart.AppVersion }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
           command: ["/bin/sh", "-c", "cp -f /frr-reloader.sh /etc/frr_reloader/"]
           volumeMounts:
             - name: reloader
@@ -185,12 +196,24 @@ spec:
         # Copies the metrics exporter
         - name: cp-metrics
           image: {{ .Values.frrk8s.image.repository }}:{{ .Values.frrk8s.image.tag | default .Chart.AppVersion }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
           command: ["/bin/sh", "-c", "cp -f /frr-metrics /etc/frr_metrics/"]
           volumeMounts:
             - name: metrics
               mountPath: /etc/frr_metrics
         - name: cp-frr-status
           image: {{ .Values.frrk8s.image.repository }}:{{ .Values.frrk8s.image.tag | default .Chart.AppVersion }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
           command: ["/bin/sh", "-c", "cp -f /frr-status /etc/frr_status/"]
           volumeMounts:
             - name: frr-status
@@ -346,6 +369,12 @@ spec:
         {{- if .Values.frrk8s.frr.image.pullPolicy }}
         imagePullPolicy: {{ .Values.frrk8s.frr.image.pullPolicy }}
         {{- end }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
         command: ["/etc/frr_reloader/frr-reloader.sh"]
         volumeMounts:
           - name: frr-sockets
@@ -360,6 +389,12 @@ spec:
         {{- end }}
       - name: frr-metrics
         image: {{ .Values.frrk8s.frr.image.repository }}:{{ .Values.frrk8s.frr.image.tag | default .Chart.AppVersion }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
         command: ["/etc/frr_metrics/frr-metrics"]
         args:
           - --metrics-port={{ .Values.frrk8s.frr.secureMetricsPort }}
@@ -397,6 +432,12 @@ spec:
           {{- toYaml . | nindent 12 }}
         {{- end }}
       - name: frr-status
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
         args:
           - --node-name=$(NODE_NAME)
           - --namespace=$(NAMESPACE)
